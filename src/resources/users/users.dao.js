@@ -27,7 +27,7 @@ export default class UsersDAO {
 
   static async createUser(email, password) {
     try {
-      const user = { email, password };
+      const user = { email, password, createdAt: new Date() };
       const result = await usersCollection.insertOne(user);
       return !!result.insertedId;
     } catch (err) {

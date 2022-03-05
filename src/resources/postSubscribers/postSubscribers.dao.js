@@ -19,7 +19,11 @@ export default class PostSubscribersDAO {
 
   static async subscribe(postId, userId) {
     try {
-      const postSubscriberDoc = { postId: new ObjectId(postId), userId };
+      const postSubscriberDoc = {
+        postId: new ObjectId(postId),
+        userId,
+        createdAt: new Date(),
+      };
       const result = await postSubscribersCollection.insertOne(
         postSubscriberDoc
       );
