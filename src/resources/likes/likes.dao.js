@@ -21,8 +21,16 @@ export default class LikesDAO {
       const likeDoc = {
         postId: new ObjectId(postId),
         userId,
-        createdAt: new ObjectId(),
       };
+
+      const likeExist = await likesCollection.find(likeDoc).toArray();
+      if (likeExist.length > 0) {
+        const errMessage = "User already liked post";
+        console.log(`user ${userId} already liked post ${postId} LikesDAO`);
+        return { success: false, error: errMessage };
+      }
+
+      likeDoc.createdAt = new Date();
 
       const result = await likesCollection.insertOne(likeDoc);
       return !!result.insertedId;

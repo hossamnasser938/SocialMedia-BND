@@ -33,8 +33,8 @@ export const sendFailureResponse = (res, keys, vals) => {
   res.json(jsonObj);
 };
 
-export const sendConditionalSuccessResult = (res, success) => {
-  res.json({ success });
+export const sendConditionalSuccessResult = (res, success, error) => {
+  res.json({ success, error });
 };
 
 export const sendNotFoundResponse = (res, errorOrResult) => {

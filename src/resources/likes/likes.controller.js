@@ -25,8 +25,8 @@ export default class LikesController {
     }
 
     try {
-      const success = await LikesDAO.likePost(postId, user._id);
-      sendConditionalSuccessResult(res, success);
+      const { success, error } = await LikesDAO.likePost(postId, user._id);
+      sendConditionalSuccessResult(res, success, error);
     } catch (err) {
       sendUnexpectedResponse(res, err);
     }

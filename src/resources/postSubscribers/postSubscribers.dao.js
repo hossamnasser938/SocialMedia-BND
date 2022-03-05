@@ -22,8 +22,21 @@ export default class PostSubscribersDAO {
       const postSubscriberDoc = {
         postId: new ObjectId(postId),
         userId,
-        createdAt: new Date(),
       };
+
+      const subscriberExist = await postSubscribersCollection
+        .find(postSubscriberDoc)
+        .toArray();
+
+      if (subscriberExist.length > 0) {
+        console.log(
+          `user ${userId} already subscribed to post ${postId} PostSubscribersDAO`
+        );
+        return false;
+      }
+
+      postSubscriberDoc.createdAt = new Date();
+
       const result = await postSubscribersCollection.insertOne(
         postSubscriberDoc
       );
