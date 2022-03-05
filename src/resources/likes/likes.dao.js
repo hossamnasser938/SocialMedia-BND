@@ -34,10 +34,11 @@ export default class LikesDAO {
 
   static async unlikePost(postId, userId) {
     try {
-      const result = await likesCollection.deleteOne({
+      const likeDoc = {
         postId: new ObjectId(postId),
         userId,
-      });
+      };
+      const result = await likesCollection.deleteOne(likeDoc);
       return result.deletedCount === 1;
     } catch (err) {
       console.log("Failed to unlike post LikesDAO", err);
