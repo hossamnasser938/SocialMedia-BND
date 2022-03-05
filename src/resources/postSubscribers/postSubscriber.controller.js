@@ -6,7 +6,7 @@ import {
 
 export default class PostSubscribersController {
   static async unsubscribe(req, res) {
-    const { postId } = req.query;
+    const { postId } = req.body;
     const { user } = res.locals;
 
     try {
