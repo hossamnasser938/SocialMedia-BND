@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { validationMiddleware } from "../../middlewares/validation";
 import LikesController from "./likes.controller";
-import { likeUnlikePostSchema } from "./likes.schema";
+import { getPostLikesSchema, likeUnlikePostSchema } from "./likes.schema";
 
 const router = new Router();
 
-router.route("/").get(LikesController.getPostLikes);
+router
+  .route("/")
+  .get(validationMiddleware(getPostLikesSchema), LikesController.getPostLikes);
 router
   .route("/like")
   .post(validationMiddleware(likeUnlikePostSchema), LikesController.likePost);
