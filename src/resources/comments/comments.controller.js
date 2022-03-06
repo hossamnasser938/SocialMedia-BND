@@ -44,10 +44,10 @@ export default class CommentsController {
   }
 
   static async getPostComments(req, res) {
-    const { postId, page } = req.query;
+    const { post_id, page } = req.query;
 
     try {
-      const postComments = await CommentsDAO.getPostComments(postId, page);
+      const postComments = await CommentsDAO.getPostComments(post_id, page);
       sendSuccessResponse(res, "comments", postComments);
     } catch (err) {
       sendUnexpectedResponse(res, err);
