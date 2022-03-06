@@ -33,10 +33,10 @@ export default class LikesDAO {
       likeDoc.createdAt = new Date();
 
       const result = await likesCollection.insertOne(likeDoc);
-      return !!result.insertedId;
+      return { success: !!result.insertedId };
     } catch (err) {
       console.log("Failed to like post LikesDAO", err);
-      return false;
+      return { success: false };
     }
   }
 
