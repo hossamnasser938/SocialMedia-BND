@@ -1,4 +1,4 @@
 import Joi from "joi";
-Joi.objectId = require("joi-objectid")(Joi);
+Joi.objectID = require("joi-objectid")(Joi);
 
-export const likeUnlikePostSchema = Joi.object({ postId: Joi.objectId() });
+export const likeUnlikePostSchema = Joi.object({ postId: Joi.objectID() });
