@@ -51,7 +51,7 @@ export default class CommentsDAO {
     }
   }
 
-  static async getPostComments(postId, page) {
+  static async getPostComments(postId, page = 1) {
     try {
       const pipeline = [
         { $match: { postId: new ObjectId(postId) } },

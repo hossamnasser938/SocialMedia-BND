@@ -125,7 +125,7 @@ export default class PostsDAO {
     }
   }
 
-  static async getPosts(authUserId, userId, page) {
+  static async getPosts(authUserId, userId, page = 1) {
     try {
       const pipeline = [
         { $match: userId ? { userId: new ObjectId(userId) } : {} },

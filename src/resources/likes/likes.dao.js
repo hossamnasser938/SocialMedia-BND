@@ -54,7 +54,7 @@ export default class LikesDAO {
     }
   }
 
-  static async getPostLikes(postId, page) {
+  static async getPostLikes(postId, page = 1) {
     try {
       const pipeline = [
         { $match: { postId: new ObjectId(postId) } },
