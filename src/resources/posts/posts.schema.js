@@ -8,4 +8,4 @@ export const getPostsSchema = Joi.object({
   user_id: Joi.objectID(),
 });
 
-export const getPostSchema = Joi.object({ id: Joi.objectID() });
+export const getPostSchema = Joi.object({ id: Joi.objectID().required() });
