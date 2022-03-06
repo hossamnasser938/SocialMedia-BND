@@ -51,10 +51,10 @@ export default class LikesController {
   }
 
   static async getPostLikes(req, res) {
-    const { postId, page } = req.query;
+    const { post_id, page } = req.query;
 
     try {
-      const likes = await LikesDAO.getPostLikes(postId, page);
+      const likes = await LikesDAO.getPostLikes(post_id, page);
       sendSuccessResponse(res, "likes", likes);
     } catch (err) {
       sendUnexpectedResponse(res, err);
