@@ -10,14 +10,23 @@ import {
 import UsersDAO from "./users.dao";
 import { createToken } from "../../middlewares/authentication";
 import { encrypt } from "../../utils/helpers";
+import OtpsDAO from "../otps/otps.dao";
 
 export default class UsersController {
   static async signup(req, res) {
     try {
       const { email, password } = req.body;
       const encryptedPassword = encrypt(password);
-      const success = await UsersDAO.createUser(email, encryptedPassword);
-      sendConditionalSuccessResult(res, success);
+      const { success, userId } = await UsersDAO.createUser(
+        email,
+        encryptedPassword
+      );
+      if (success) {
+        const successInsertingOtp = await OtpsDAO.insertOtp(userId);
+        sendConditionalSuccessResult(res, successInsertingOtp);
+      } else {
+        sendFailureResponse(res);
+      }
     } catch (err) {
       sendUnexpectedResponse(res, err);
     }

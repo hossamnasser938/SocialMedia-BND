@@ -27,10 +27,10 @@ export default class UsersDAO {
     try {
       const user = { email, password, verified: false, createdAt: new Date() };
       const result = await usersCollection.insertOne(user);
-      return !!result.insertedId;
+      return { success: !!result.insertedId, userId: result.insertedId };
     } catch (err) {
       console.log("Failed to create user UsersDAO", err);
-      return false;
+      return { success: false, error: err };
     }
   }
 }

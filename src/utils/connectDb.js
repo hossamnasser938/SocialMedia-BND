@@ -5,6 +5,7 @@ import PostsDAO from "../resources/posts/posts.dao";
 import CommentsDAO from "../resources/comments/comments.dao";
 import LikesDAO from "../resources/likes/likes.dao";
 import PostSubscribersDAO from "../resources/postSubscribers/postSubscribers.dao";
+import OtpsDAO from "../resources/otps/otps.dao";
 
 export const connectDB = async () => {
   return new Promise((res, rej) => {
@@ -16,6 +17,7 @@ export const connectDB = async () => {
           await CommentsDAO.injectDB(client);
           await LikesDAO.injectDB(client);
           await PostSubscribersDAO.injectDB(client);
+          await OtpsDAO.injectDB(client);
 
           res(client);
         } catch (err) {
