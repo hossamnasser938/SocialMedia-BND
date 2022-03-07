@@ -5,6 +5,7 @@ import {
   sendNotFoundResponse,
   sendUnexpectedResponse,
   sendConditionalSuccessResult,
+  sendFailureResponse,
 } from "../../utils/helpers";
 import UsersDAO from "./users.dao";
 import { createToken } from "../../middlewares/authentication";
@@ -41,10 +42,16 @@ export default class UsersController {
         return;
       }
 
+      const user = { ...document };
+      delete user.password;
+
+      if (!user.verified) {
+        sendFailureResponse(res, ["user"], [user]);
+        return;
+      }
+
       const token = createToken(document._id);
       if (document) {
-        const user = { ...document };
-        delete user.password;
         sendSuccessResponse(res, ["user", "token"], [user, token]);
       } else {
         sendNotFoundResponse(res, document);
