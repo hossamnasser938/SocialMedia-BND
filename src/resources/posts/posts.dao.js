@@ -114,9 +114,7 @@ const postsHideUserIdProjectionStage = { $project: { userId: 0 } };
 
 export default class PostsDAO {
   static async injectDB(conn) {
-    if (postsCollection) {
-      return;
-    }
+    if (postsCollection) return;
 
     try {
       postsCollection = await conn.db(process.env.DB).collection("posts");

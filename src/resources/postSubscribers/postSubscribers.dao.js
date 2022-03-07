@@ -4,9 +4,7 @@ let postSubscribersCollection;
 
 export default class PostSubscribersDAO {
   static async injectDB(conn) {
-    if (postSubscribersCollection) {
-      return;
-    }
+    if (postSubscribersCollection) return;
 
     try {
       postSubscribersCollection = await conn

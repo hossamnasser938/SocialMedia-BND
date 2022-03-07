@@ -4,9 +4,7 @@ let usersCollection;
 
 export default class UsersDAO {
   static async injectDB(conn) {
-    if (usersCollection) {
-      return;
-    }
+    if (usersCollection) return;
 
     try {
       usersCollection = await conn.db(process.env.DB).collection("users");

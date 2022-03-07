@@ -23,9 +23,7 @@ const commentsReduceLookupArraysSetStage = {
 
 export default class CommentsDAO {
   static async injectDB(conn) {
-    if (commentsCollection) {
-      return;
-    }
+    if (commentsCollection) return;
 
     try {
       commentsCollection = await conn.db(process.env.DB).collection("comments");

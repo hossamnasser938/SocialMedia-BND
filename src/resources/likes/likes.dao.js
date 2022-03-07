@@ -5,9 +5,7 @@ let likesCollection;
 
 export default class LikesDAO {
   static async injectDB(conn) {
-    if (likesCollection) {
-      return;
-    }
+    if (likesCollection) return;
 
     try {
       likesCollection = await conn.db(process.env.DB).collection("likes");
