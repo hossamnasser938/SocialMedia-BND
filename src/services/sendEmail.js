@@ -1,13 +1,10 @@
 import nodemailer from "nodemailer";
 
-const DEFAULT_FROM_EMAIL = "hos.dev.938@gmail.com";
-const DEFAULT_FROM_EMAIL_PASSWORD = "Hossam.dev.938";
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: DEFAULT_FROM_EMAIL,
-    pass: DEFAULT_FROM_EMAIL_PASSWORD,
+    user: process.env.DEFAULT_FROM_EMAIL,
+    pass: process.env.DEFAULT_FROM_EMAIL_PASSWORD,
   },
 });
 
@@ -15,7 +12,7 @@ export const sendEmail = async (
   subject,
   text,
   toEmail,
-  fromEmail = DEFAULT_FROM_EMAIL
+  fromEmail = process.env.DEFAULT_FROM_EMAIL
 ) => {
   const emailOptions = {
     from: fromEmail,
