@@ -5,7 +5,7 @@ import {
 } from "../../utils/helpers";
 import CommentsDAO from "./comments.dao";
 import PostSubscribersDAO from "../postSubscribers/postSubscribers.dao";
-import { notifyPostSubscribers } from "../../services/notifyPostSubscribers";
+import { fork } from "child_process";
 
 export default class CommentsController {
   static async createComment(req, res) {
@@ -18,11 +18,14 @@ export default class CommentsController {
       console.log("failed to subscribe a post", err);
     }
 
-    try {
-      await notifyPostSubscribers(user, postId, "comment");
-    } catch (err) {
-      console.log("failed to notify post subscribers", err);
-    }
+    const notifyPostSubscribersProcess = fork(
+      "./src/services/notifyPostSubscribers.js"
+    );
+    notifyPostSubscribersProcess.send({
+      authUser: user,
+      postId,
+      reaction: "comment",
+    });
 
     try {
       const success = await CommentsDAO.createComment(text, user._id, postId);

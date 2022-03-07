@@ -5,7 +5,7 @@ import {
 } from "../../utils/helpers";
 import LikesDAO from "./likes.dao";
 import PostSubscribersDAO from "../postSubscribers/postSubscribers.dao";
-import { notifyPostSubscribers } from "../../services/notifyPostSubscribers";
+import { fork } from "child_process";
 
 export default class LikesController {
   static async likePost(req, res) {
@@ -18,11 +18,14 @@ export default class LikesController {
       console.log("failed to subscribe a post", err);
     }
 
-    try {
-      await notifyPostSubscribers(user, postId, "like");
-    } catch (err) {
-      console.log("failed to notify post subscribers", err);
-    }
+    const notifyPostSubscribersProcess = fork(
+      "./src/services/notifyPostSubscribers.js"
+    );
+    notifyPostSubscribersProcess.send({
+      authUser: user,
+      postId,
+      reaction: "like",
+    });
 
     try {
       const { success, error } = await LikesDAO.likePost(postId, user._id);

@@ -1,11 +1,16 @@
-import PostSubscribersDAO from "../resources/postSubscribers/postSubscribers.dao";
+import dotenv from "dotenv";
+import { MongoClient } from "mongodb";
+
+import UsersDAO from "../resources/users/users.dao";
 import PostsDAO from "../resources/posts/posts.dao";
+import CommentsDAO from "../resources/comments/comments.dao";
+import LikesDAO from "../resources/likes/likes.dao";
+import PostSubscribersDAO from "../resources/postSubscribers/postSubscribers.dao";
 import { sendEmail } from "./sendEmail";
 
 // reaction = like | comment;
 
 const getNotificationMessage = (authUser, userEmail, post, reaction) => {
-  console.log("authUser, post", authUser, post);
   let action, targetPost;
   switch (reaction) {
     case "like":
@@ -39,6 +44,38 @@ export const notifyPostSubscribers = async (authUser, postId, reaction) => {
     const subject = "Post reaction";
     const message = getNotificationMessage(authUser, email, post, reaction);
 
-    sendEmail(subject, message, email);
+    sendEmail(subject, message, email).catch((err) => {
+      console.log("failed to send email", err);
+    });
   });
 };
+
+process.on("message", async (message) => {
+  const { authUser, postId, reaction } = message;
+
+  if (authUser && postId && reaction) {
+    dotenv.config();
+
+    try {
+      MongoClient.connect(process.env.DB_URI)
+        .then(async (client) => {
+          await UsersDAO.injectDB(client);
+          await PostsDAO.injectDB(client);
+          await CommentsDAO.injectDB(client);
+          await LikesDAO.injectDB(client);
+          await PostSubscribersDAO.injectDB(client);
+          await notifyPostSubscribers(authUser, postId, reaction);
+        })
+        .catch((err) => {
+          console.log("error connecting to db", err);
+        });
+    } catch (err) {
+      console.log("failed to notify post subscribers", err);
+    }
+  } else {
+    console.log(
+      "received incorrectly formatted message to snotifyPostSubscribers",
+      message
+    );
+  }
+});
