@@ -33,4 +33,16 @@ export default class UsersDAO {
       return { success: false, error: err };
     }
   }
+
+  static async updateUser(userId, newUser) {
+    const query = { _id: new ObjectId(userId) };
+
+    try {
+      const result = await usersCollection.updateOne(query, { $set: newUser });
+      return !!result.modifiedCount;
+    } catch (err) {
+      console.log("Failed to update user UsersDAO", err);
+      return false;
+    }
+  }
 }

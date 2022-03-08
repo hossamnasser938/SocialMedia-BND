@@ -69,4 +69,20 @@ export default class UsersController {
       sendUnexpectedResponse(res, err);
     }
   }
+
+  static async verify(req, res) {
+    const { userId, code } = req.body;
+
+    try {
+      const result = await OtpsDAO.getOtp(userId, code);
+      if (result) {
+        const success = await UsersDAO.updateUser(userId, { verified: true });
+        sendConditionalSuccessResult(res, success);
+      } else {
+        sendFailureResponse(res, ["error"], ["Incorrect code"]);
+      }
+    } catch (err) {
+      sendUnexpectedResponse(res, err);
+    }
+  }
 }
