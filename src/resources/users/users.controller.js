@@ -11,6 +11,7 @@ import UsersDAO from "./users.dao";
 import { createToken } from "../../middlewares/authentication";
 import { encrypt } from "../../utils/helpers";
 import OtpsDAO from "../otps/otps.dao";
+import { sendEmail } from "../../services/sendEmail";
 
 export default class UsersController {
   static async signup(req, res) {
@@ -22,8 +23,18 @@ export default class UsersController {
         encryptedPassword
       );
       if (success) {
-        const successInsertingOtp = await OtpsDAO.insertOtp(userId);
-        sendConditionalSuccessResult(res, successInsertingOtp);
+        const code = "123456"; // TODO: generate random
+        const successInsertingOtp = await OtpsDAO.insertOtp(userId, code);
+        if (successInsertingOtp) {
+          await sendEmail(
+            "Verification",
+            `Use code: ${code} to verify your email`,
+            email
+          );
+          sendSuccessResponse(res);
+        } else {
+          sendFailureResponse(res);
+        }
       } else {
         sendFailureResponse(res);
       }
