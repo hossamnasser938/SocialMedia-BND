@@ -8,9 +8,11 @@ const router = new Router();
 router
   .route("/")
   .get(validationMiddleware(getPostLikesSchema), LikesController.getPostLikes);
+
 router
   .route("/like")
   .post(validationMiddleware(likeUnlikePostSchema), LikesController.likePost);
+
 router
   .route("/unlike")
   .post(validationMiddleware(likeUnlikePostSchema), LikesController.unlikePost);

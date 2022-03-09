@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
 import UsersDAO from "../resources/users/users.dao";
 import PostsDAO from "../resources/posts/posts.dao";

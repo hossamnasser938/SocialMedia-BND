@@ -27,5 +27,6 @@ export const sendEmail = async (
 
   const info = await transporter.sendMail(emailOptions);
   console.log("email info", info);
+
   if (!info.messageId) throw new Error("No message id found");
 };

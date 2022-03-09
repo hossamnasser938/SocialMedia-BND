@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb";
-import { PAGE_ITEMS_COUNT } from "../../utils/constants";
 
 let likesCollection;
 
@@ -15,22 +14,22 @@ export default class LikesDAO {
   }
 
   static async likePost(postId, userId) {
-    try {
-      const likeDoc = {
-        postId: new ObjectId(postId),
-        userId,
-      };
+    const like = {
+      postId: new ObjectId(postId),
+      userId,
+    };
 
-      const likeExist = await likesCollection.find(likeDoc).toArray();
+    try {
+      const likeExist = await likesCollection.find(like).toArray();
       if (likeExist.length > 0) {
         const errMessage = "User already liked post";
         console.log(`user ${userId} already liked post ${postId} LikesDAO`);
         return { success: false, error: errMessage };
       }
 
-      likeDoc.createdAt = new Date();
+      like.createdAt = new Date();
 
-      const result = await likesCollection.insertOne(likeDoc);
+      const result = await likesCollection.insertOne(like);
       return { success: !!result.insertedId };
     } catch (err) {
       console.log("Failed to like post LikesDAO", err);
@@ -39,12 +38,13 @@ export default class LikesDAO {
   }
 
   static async unlikePost(postId, userId) {
+    const likeQuery = {
+      postId: new ObjectId(postId),
+      userId,
+    };
+
     try {
-      const likeDoc = {
-        postId: new ObjectId(postId),
-        userId,
-      };
-      const result = await likesCollection.deleteOne(likeDoc);
+      const result = await likesCollection.deleteOne(likeQuery);
       return result.deletedCount === 1;
     } catch (err) {
       console.log("Failed to unlike post LikesDAO", err);
@@ -65,8 +65,8 @@ export default class LikesDAO {
           },
         },
         { $sort: { createdAt: -1 } },
-        { $skip: (page - 1) * PAGE_ITEMS_COUNT },
-        { $limit: PAGE_ITEMS_COUNT },
+        { $skip: (page - 1) * +process.env.PAGE_ITEMS_COUNT },
+        { $limit: +process.env.PAGE_ITEMS_COUNT },
         {
           $replaceRoot: {
             newRoot: {
@@ -85,6 +85,7 @@ export default class LikesDAO {
           },
         },
       ];
+
       const likes = likesCollection.aggregate(pipeline).toArray();
       return likes;
     } catch (err) {

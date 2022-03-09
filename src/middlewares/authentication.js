@@ -1,15 +1,14 @@
 import { sign, verify } from "jsonwebtoken";
 import UsersDAO from "../resources/users/users.dao";
-import { AUTH_SECRET, TOKEN_TYPE } from "../utils/constants";
 import { sendUnauthenticated, sendUnexpectedResponse } from "../utils/helpers";
 
 export const createToken = (userId) => {
-  return sign({ userId }, AUTH_SECRET);
+  return sign({ userId }, process.env.AUTH_SECRET);
 };
 
 export const verifyToken = (token) => {
   return new Promise((resolve, reject) => {
-    verify(token, AUTH_SECRET, (err, payload) => {
+    verify(token, process.env.AUTH_SECRET, (err, payload) => {
       if (err) return reject(err);
       resolve(payload.userId);
     });
@@ -18,19 +17,24 @@ export const verifyToken = (token) => {
 
 export const authenticationMiddleware = async (req, res, next) => {
   const { authorization } = req.headers;
-  const token = authorization && authorization.split(TOKEN_TYPE + " ")[1];
+  const token =
+    authorization && authorization.split(process.env.TOKEN_TYPE + " ")[1];
+
   try {
     const userId = await verifyToken(token);
-    if (userId) {
-      const user = await UsersDAO.getUserById(userId);
-      if (user) {
-        res.locals.user = user;
-        return next();
-      }
-      sendUnauthenticated(res, user);
-    } else {
+    if (!userId) {
       sendUnexpectedResponse(res, userId);
+      return;
     }
+
+    const user = await UsersDAO.getUserById(userId);
+    if (!user) {
+      sendUnauthenticated(res, user);
+      return;
+    }
+
+    res.locals.user = user;
+    return next();
   } catch (err) {
     sendUnauthenticated(res, err);
   }

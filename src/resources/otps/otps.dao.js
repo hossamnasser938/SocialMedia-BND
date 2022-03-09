@@ -14,10 +14,10 @@ export default class OtpsDAO {
   }
 
   static async insertOtp(userId, code) {
-    const otpDoc = { code, userId, createdAt: new Date() };
+    const otp = { code, userId, createdAt: new Date() };
 
     try {
-      const result = await otpsCollection.insertOne(otpDoc);
+      const result = await otpsCollection.insertOne(otp);
       return !!result.insertedId;
     } catch (err) {
       console.log("failed to insert otp doc", err);

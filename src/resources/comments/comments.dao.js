@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb";
-import { PAGE_ITEMS_COUNT } from "../../utils/constants";
 
 let commentsCollection;
 
@@ -58,7 +57,7 @@ export default class CommentsDAO {
         commentsReduceLookupArraysSetStage,
         { $sort: { createdAt: -1 } },
         { $skip: (page - 1) * 10 },
-        { $limit: PAGE_ITEMS_COUNT },
+        { $limit: +process.env.PAGE_ITEMS_COUNT },
       ];
 
       const postComments = await commentsCollection

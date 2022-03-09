@@ -8,46 +8,53 @@ import {
   sendFailureResponse,
 } from "../../utils/helpers";
 import UsersDAO from "./users.dao";
+import OtpsDAO from "../otps/otps.dao";
 import { createToken } from "../../middlewares/authentication";
 import { encrypt } from "../../utils/helpers";
-import OtpsDAO from "../otps/otps.dao";
 import { sendEmail } from "../../services/sendEmail";
 import { generateRandomVerificationCode } from "../otps/otps.utils";
 import { isCodeExpired } from "./users.utils";
 
 export default class UsersController {
   static async signup(req, res) {
+    const { email, password } = req.body;
+
     try {
-      const { email, password } = req.body;
       const encryptedPassword = encrypt(password);
+
       const { success, userId } = await UsersDAO.createUser(
         email,
         encryptedPassword
       );
-      if (success) {
-        const code = generateRandomVerificationCode();
-        const successInsertingOtp = await OtpsDAO.insertOtp(userId, code);
-        if (successInsertingOtp) {
-          await sendEmail(
-            "Verification",
-            `Use code: ${code} to verify your email`,
-            email
-          );
-          sendSuccessResponse(res);
-        } else {
-          sendFailureResponse(res);
-        }
-      } else {
+
+      if (!success) {
         sendFailureResponse(res);
+        return;
       }
+
+      const code = generateRandomVerificationCode();
+      const successInsertingOtp = await OtpsDAO.insertOtp(userId, code);
+
+      if (!successInsertingOtp) {
+        sendFailureResponse(res);
+        return;
+      }
+
+      await sendEmail(
+        "Verification",
+        `Use code: ${code} to verify your email`,
+        email
+      );
+      sendSuccessResponse(res);
     } catch (err) {
       sendUnexpectedResponse(res, err);
     }
   }
 
   static async signin(req, res) {
+    const { email, password } = req.body;
+
     try {
-      const { email, password } = req.body;
       const document = await UsersDAO.getUserByEmail(email);
       if (!document) {
         sendUserNotFound(res);
@@ -88,16 +95,19 @@ export default class UsersController {
 
     try {
       const otpDoc = await OtpsDAO.getOtp(userId, code);
-      if (otpDoc) {
-        if (!isCodeExpired(otpDoc.createdAt)) {
-          const success = await UsersDAO.updateUser(userId, { verified: true });
-          sendConditionalSuccessResult(res, success);
-        } else {
-          sendFailureResponse(res, ["error"], ["Code expired"]);
-        }
-      } else {
-        sendFailureResponse(res, ["error"], ["Incorrect code"]);
+
+      if (!otpDoc) {
+        sendFailureResponse(res, "error", "Incorrect code");
+        return;
       }
+
+      if (isCodeExpired(otpDoc.createdAt)) {
+        sendFailureResponse(res, ["error"], ["Code expired"]);
+        return;
+      }
+
+      const success = await UsersDAO.updateUser(userId, { verified: true });
+      sendConditionalSuccessResult(res, success);
     } catch (err) {
       sendUnexpectedResponse(res, err);
     }

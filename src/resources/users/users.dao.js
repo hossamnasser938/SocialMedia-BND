@@ -14,18 +14,33 @@ export default class UsersDAO {
   }
 
   static async getUserById(id) {
-    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
-    return user;
+    const userQuery = { _id: new ObjectId(id) };
+
+    try {
+      const user = await usersCollection.findOne(userQuery);
+      return user;
+    } catch (err) {
+      console.log("Failed to get user UsersDAO", err);
+      return null;
+    }
   }
 
   static async getUserByEmail(email) {
-    const user = await usersCollection.findOne({ email });
-    return user;
+    const userQuery = { email };
+
+    try {
+      const user = await usersCollection.findOne(userQuery);
+      return user;
+    } catch (err) {
+      console.log("Failed to get user UsersDAO", err);
+      return null;
+    }
   }
 
   static async createUser(email, password) {
+    const user = { email, password, verified: false, createdAt: new Date() };
+
     try {
-      const user = { email, password, verified: false, createdAt: new Date() };
       const result = await usersCollection.insertOne(user);
       return { success: !!result.insertedId, userId: result.insertedId };
     } catch (err) {

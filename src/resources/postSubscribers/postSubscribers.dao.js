@@ -16,14 +16,14 @@ export default class PostSubscribersDAO {
   }
 
   static async subscribe(postId, userId) {
-    try {
-      const postSubscriberDoc = {
-        postId: new ObjectId(postId),
-        userId,
-      };
+    const postSubscriber = {
+      postId: new ObjectId(postId),
+      userId,
+    };
 
+    try {
       const subscriberExist = await postSubscribersCollection
-        .find(postSubscriberDoc)
+        .find(postSubscriber)
         .toArray();
 
       if (subscriberExist.length > 0) {
@@ -33,11 +33,9 @@ export default class PostSubscribersDAO {
         return false;
       }
 
-      postSubscriberDoc.createdAt = new Date();
+      postSubscriber.createdAt = new Date();
 
-      const result = await postSubscribersCollection.insertOne(
-        postSubscriberDoc
-      );
+      const result = await postSubscribersCollection.insertOne(postSubscriber);
       return !!result.insertedId;
     } catch (err) {
       console.log("Failed to create postSubscriber PostSubscribersDAO", err);
@@ -46,9 +44,12 @@ export default class PostSubscribersDAO {
   }
 
   static async unsubscribe(postId, userId) {
+    const postSubscriberQuery = { postId: new ObjectId(postId), userId };
+
     try {
-      const postSubscriberDoc = { postId: new ObjectId(postId), userId };
-      const result = await postSubscribersCollection.remove(postSubscriberDoc);
+      const result = await postSubscribersCollection.remove(
+        postSubscriberQuery
+      );
       return !!result.deletedCount;
     } catch (err) {
       console.log("Failed to remove postSubscriber PostSubscribersDAO", err);
@@ -77,10 +78,15 @@ export default class PostSubscribersDAO {
       { $project: { email: 1, _id: 0 } },
     ];
 
-    const postSubscribers = await postSubscribersCollection
-      .aggregate(pipeline)
-      .toArray();
+    try {
+      const postSubscribers = await postSubscribersCollection
+        .aggregate(pipeline)
+        .toArray();
 
-    return postSubscribers;
+      return postSubscribers;
+    } catch (err) {
+      console.log("Failed to get postSubscribers PostSubscribersDAO", err);
+      return [];
+    }
   }
 }

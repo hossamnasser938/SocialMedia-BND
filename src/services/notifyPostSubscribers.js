@@ -6,7 +6,7 @@ import { prepareServer } from "../utils/prepareServer";
 // reaction = like | comment;
 
 const getNotificationMessage = (authUser, userEmail, post, reaction) => {
-  let action, targetPost;
+  let action;
   switch (reaction) {
     case "like":
       action = "liked";
@@ -18,8 +18,10 @@ const getNotificationMessage = (authUser, userEmail, post, reaction) => {
       throw new Error("reaction not like nor comment");
   }
 
-  if (post.createdUser.email === userEmail) targetPost = "your post";
-  else targetPost = "a post you subscribed to";
+  const targetPost =
+    post.createdUser.email === userEmail
+      ? "your post"
+      : "a post you subscribed to";
 
   return `${authUser.email} ${action} ${targetPost}`;
 };

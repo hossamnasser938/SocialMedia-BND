@@ -1,16 +1,15 @@
 import { ObjectId } from "mongodb";
-import { PAGE_ITEMS_COUNT } from "../../utils/constants";
 
 let postsCollection;
 
-const postsCommentsLookupStage = {
+const postsCommentsLookupStage = () => ({
   $lookup: {
     from: "comments",
     let: { postId: "$_id" },
     pipeline: [
       { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
       { $sort: { createdAt: -1 } },
-      { $limit: PAGE_ITEMS_COUNT },
+      { $limit: +process.env.PAGE_ITEMS_COUNT },
       {
         $lookup: {
           from: "users",
@@ -37,16 +36,16 @@ const postsCommentsLookupStage = {
     ],
     as: "comments",
   },
-};
+});
 
-const postsLikesLookupStage = {
+const postsLikesLookupStage = () => ({
   $lookup: {
     from: "likes",
     let: { postId: "$_id" },
     pipeline: [
       { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
       { $sort: { createdAt: -1 } },
-      { $limit: PAGE_ITEMS_COUNT },
+      { $limit: +process.env.PAGE_ITEMS_COUNT },
       {
         $lookup: {
           from: "users",
@@ -68,7 +67,7 @@ const postsLikesLookupStage = {
     ],
     as: "userLikes",
   },
-};
+});
 
 const postsAuthUserLookupStages = (userId) => [
   {
@@ -127,16 +126,17 @@ export default class PostsDAO {
     try {
       const pipeline = [
         { $match: userId ? { userId: new ObjectId(userId) } : {} },
-        postsCommentsLookupStage,
-        postsLikesLookupStage,
+        postsCommentsLookupStage(),
+        postsLikesLookupStage(),
         ...postsAuthUserLookupStages(authUserId),
         postsCreatedUserLookupStage,
         postsReduceLookupArraysSetStage,
         postsHideUserIdProjectionStage,
         { $sort: { createdAt: -1 } },
         { $skip: (page - 1) * 10 },
-        { $limit: PAGE_ITEMS_COUNT },
+        { $limit: +process.env.PAGE_ITEMS_COUNT },
       ];
+
       const posts = await postsCollection.aggregate(pipeline).toArray();
       return posts;
     } catch (err) {
@@ -149,27 +149,28 @@ export default class PostsDAO {
     try {
       const pipeline = [
         { $match: { _id: new ObjectId(postId) } },
-        postsCommentsLookupStage,
-        postsLikesLookupStage,
+        postsCommentsLookupStage(),
+        postsLikesLookupStage(),
         ...postsAuthUserLookupStages(authUserId),
         postsCreatedUserLookupStage,
         postsReduceLookupArraysSetStage,
         postsHideUserIdProjectionStage,
       ];
+
       const postsMatched = await postsCollection.aggregate(pipeline).toArray();
       const post = postsMatched.length === 1 ? postsMatched[0] : null;
       return post;
     } catch (err) {
-      console.log("failed to get posts PostsDAO", err);
+      console.log("failed to get post PostsDAO", err);
       return null;
     }
   }
 
   static async createPost(text, userId) {
-    const postDoc = { text, userId, createdAt: new Date() };
+    const post = { text, userId, createdAt: new Date() };
 
     try {
-      const result = await postsCollection.insertOne(postDoc);
+      const result = await postsCollection.insertOne(post);
       return { success: !!result.insertedId, postId: result.insertedId };
     } catch (err) {
       console.log("Failed to create post PostsDAO", err);
