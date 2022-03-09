@@ -13,7 +13,7 @@ export default class OtpsDAO {
     }
   }
 
-  static async insertOtp(userId, code = "123456") {
+  static async insertOtp(userId, code) {
     const otpDoc = { code, userId, createdAt: new Date() };
 
     try {

@@ -12,6 +12,7 @@ import { createToken } from "../../middlewares/authentication";
 import { encrypt } from "../../utils/helpers";
 import OtpsDAO from "../otps/otps.dao";
 import { sendEmail } from "../../services/sendEmail";
+import { generateRandomVerificationCode } from "../otps/otps.utils";
 
 export default class UsersController {
   static async signup(req, res) {
@@ -23,7 +24,7 @@ export default class UsersController {
         encryptedPassword
       );
       if (success) {
-        const code = "123456"; // TODO: generate random
+        const code = generateRandomVerificationCode();
         const successInsertingOtp = await OtpsDAO.insertOtp(userId, code);
         if (successInsertingOtp) {
           await sendEmail(
