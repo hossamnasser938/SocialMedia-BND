@@ -30,10 +30,10 @@ export default class OtpsDAO {
 
     try {
       const result = await otpsCollection.findOne(otpQuery);
-      return !!result;
+      return result;
     } catch (err) {
       console.log("failed to find otp doc", err);
-      return false;
+      return null;
     }
   }
 }

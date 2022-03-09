@@ -13,6 +13,7 @@ import { encrypt } from "../../utils/helpers";
 import OtpsDAO from "../otps/otps.dao";
 import { sendEmail } from "../../services/sendEmail";
 import { generateRandomVerificationCode } from "../otps/otps.utils";
+import { isCodeExpired } from "./users.utils";
 
 export default class UsersController {
   static async signup(req, res) {
@@ -86,10 +87,14 @@ export default class UsersController {
     const { userId, code } = req.body;
 
     try {
-      const result = await OtpsDAO.getOtp(userId, code);
-      if (result) {
-        const success = await UsersDAO.updateUser(userId, { verified: true });
-        sendConditionalSuccessResult(res, success);
+      const otpDoc = await OtpsDAO.getOtp(userId, code);
+      if (otpDoc) {
+        if (!isCodeExpired(otpDoc.createdAt)) {
+          const success = await UsersDAO.updateUser(userId, { verified: true });
+          sendConditionalSuccessResult(res, success);
+        } else {
+          sendFailureResponse(res, ["error"], ["Code expired"]);
+        }
       } else {
         sendFailureResponse(res, ["error"], ["Incorrect code"]);
       }
