@@ -18,3 +18,8 @@ export const verifySchema = Joi.object({
   userId: Joi.objectID().required(),
   code: Joi.string().required(),
 });
+
+export const resetPasswordSchema = Joi.object({
+  oldPassword: passwordSchema,
+  newPassword: passwordSchema,
+});

@@ -112,4 +112,25 @@ export default class UsersController {
       sendUnexpectedResponse(res, err);
     }
   }
+
+  static async resetPassword(req, res) {
+    const { oldPassword, newPassword } = req.body;
+    const { user } = res.locals;
+
+    try {
+      if (!comparePlaintextCiphertext(oldPassword, user.password)) {
+        sendFailureResponse(res, "error", "Incorrct old password");
+        return;
+      }
+
+      const encryptedNewPassword = encrypt(newPassword);
+      const success = await UsersDAO.updateUser(user._id, {
+        password: encryptedNewPassword,
+      });
+
+      sendConditionalSuccessResult(res, success);
+    } catch (err) {
+      sendUnexpectedResponse(res);
+    }
+  }
 }
