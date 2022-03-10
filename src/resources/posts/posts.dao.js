@@ -1,15 +1,16 @@
 import { ObjectId } from "mongodb";
+import { PAGE_ITEMS_COUNT } from "../../utils/constants";
 
 let postsCollection;
 
-const postsCommentsLookupStage = () => ({
+const postsCommentsLookupStage = {
   $lookup: {
     from: "comments",
     let: { postId: "$_id" },
     pipeline: [
       { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
       { $sort: { createdAt: -1 } },
-      { $limit: +process.env.PAGE_ITEMS_COUNT },
+      { $limit: PAGE_ITEMS_COUNT },
       {
         $lookup: {
           from: "users",
@@ -36,7 +37,7 @@ const postsCommentsLookupStage = () => ({
     ],
     as: "comments",
   },
-});
+};
 
 const postsLikesLookupStage = () => ({
   $lookup: {
@@ -45,7 +46,7 @@ const postsLikesLookupStage = () => ({
     pipeline: [
       { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
       { $sort: { createdAt: -1 } },
-      { $limit: +process.env.PAGE_ITEMS_COUNT },
+      { $limit: PAGE_ITEMS_COUNT },
       {
         $lookup: {
           from: "users",
@@ -126,15 +127,15 @@ export default class PostsDAO {
     try {
       const pipeline = [
         { $match: userId ? { userId: new ObjectId(userId) } : {} },
-        postsCommentsLookupStage(),
-        postsLikesLookupStage(),
+        postsCommentsLookupStage,
+        postsLikesLookupStage,
         ...postsAuthUserLookupStages(authUserId),
         postsCreatedUserLookupStage,
         postsReduceLookupArraysSetStage,
         postsHideUserIdProjectionStage,
         { $sort: { createdAt: -1 } },
         { $skip: (page - 1) * 10 },
-        { $limit: +process.env.PAGE_ITEMS_COUNT },
+        { $limit: PAGE_ITEMS_COUNT },
       ];
 
       const posts = await postsCollection.aggregate(pipeline).toArray();
@@ -149,8 +150,8 @@ export default class PostsDAO {
     try {
       const pipeline = [
         { $match: { _id: new ObjectId(postId) } },
-        postsCommentsLookupStage(),
-        postsLikesLookupStage(),
+        postsCommentsLookupStage,
+        postsLikesLookupStage,
         ...postsAuthUserLookupStages(authUserId),
         postsCreatedUserLookupStage,
         postsReduceLookupArraysSetStage,

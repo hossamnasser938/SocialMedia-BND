@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { PAGE_ITEMS_COUNT } from "../../utils/constants";
 
 let likesCollection;
 
@@ -65,8 +66,8 @@ export default class LikesDAO {
           },
         },
         { $sort: { createdAt: -1 } },
-        { $skip: (page - 1) * +process.env.PAGE_ITEMS_COUNT },
-        { $limit: +process.env.PAGE_ITEMS_COUNT },
+        { $skip: (page - 1) * PAGE_ITEMS_COUNT },
+        { $limit: PAGE_ITEMS_COUNT },
         {
           $replaceRoot: {
             newRoot: {

@@ -1,7 +1,8 @@
 import { generate } from "otp-generator";
+import { OTP_LENGTH } from "../../utils/constants";
 
 export const generateRandomVerificationCode = () => {
-  const otpLength = process.env.OTP_LENGTH;
+  const otpLength = OTP_LENGTH;
   const options = {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
