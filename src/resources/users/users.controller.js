@@ -45,7 +45,7 @@ export default class UsersController {
         `Use code: ${code} to verify your email`,
         email
       );
-      sendSuccessResponse(res);
+      sendSuccessResponse(res, "userId", userId);
     } catch (err) {
       sendUnexpectedResponse(res, err);
     }
