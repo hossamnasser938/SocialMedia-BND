@@ -133,4 +133,93 @@ export default class UsersController {
       sendUnexpectedResponse(res);
     }
   }
+
+  static async forgetPassword(req, res) {
+    const { email } = req.body;
+
+    try {
+      const user = await UsersDAO.getUserByEmail(email);
+      if (!user) {
+        sendFailureResponse(res, "error", "User not found");
+        return;
+      }
+
+      const code = generateRandomVerificationCode();
+      const successInsertingOtp = await OtpsDAO.insertOtp(user._id, code);
+
+      if (!successInsertingOtp) {
+        sendUnexpectedResponse(res);
+        return;
+      }
+
+      await sendEmail(
+        "Verification",
+        `Use code: ${code} to complete forget password steps`,
+        email
+      );
+
+      sendSuccessResponse(res);
+    } catch (err) {
+      sendUnexpectedResponse(res);
+    }
+  }
+
+  static async forgetPasswordVerify(req, res) {
+    const { email, code } = req.body;
+
+    try {
+      const user = await UsersDAO.getUserByEmail(email);
+      if (!user) {
+        sendFailureResponse(res, "error", "User not found");
+        return;
+      }
+
+      const otpDoc = await OtpsDAO.getOtp(user._id, code);
+      if (!otpDoc) {
+        sendFailureResponse(res, "error", "Incorrect code");
+        return;
+      }
+
+      if (isCodeExpired(otpDoc.createdAt)) {
+        sendFailureResponse(res, ["error"], ["Code expired"]);
+        return;
+      }
+
+      sendSuccessResponse(res);
+    } catch (err) {
+      sendUnexpectedResponse(res);
+    }
+  }
+
+  static async forgetPasswordUpdate(req, res) {
+    const { email, code, newPassword } = req.body;
+
+    try {
+      const user = await UsersDAO.getUserByEmail(email);
+      if (!user) {
+        sendFailureResponse(res, "error", "User not found");
+        return;
+      }
+
+      const otpDoc = await OtpsDAO.getOtp(user._id, code);
+      if (!otpDoc) {
+        sendFailureResponse(res, "error", "Incorrect code");
+        return;
+      }
+
+      if (isCodeExpired(otpDoc.createdAt)) {
+        sendFailureResponse(res, ["error"], ["Code expired"]);
+        return;
+      }
+
+      const encryptedNewPassword = encrypt(newPassword);
+      const success = await UsersDAO.updateUser(user._id, {
+        password: encryptedNewPassword,
+      });
+
+      sendConditionalSuccessResult(res, success);
+    } catch (err) {
+      sendUnexpectedResponse(res);
+    }
+  }
 }

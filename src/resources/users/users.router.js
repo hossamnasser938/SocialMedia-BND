@@ -3,6 +3,9 @@ import { authenticationMiddleware } from "../../middlewares/authentication";
 import { validationMiddleware } from "../../middlewares/validation";
 import UsersController from "./users.controller";
 import {
+  forgetPasswordSchema,
+  forgetPasswordUpdateSchema,
+  forgetPasswordVerifySchema,
   resetPasswordSchema,
   signinSchema,
   signupSchema,
@@ -29,6 +32,27 @@ router
     validationMiddleware(resetPasswordSchema),
     authenticationMiddleware,
     UsersController.resetPassword
+  );
+
+router
+  .route("/forget-password")
+  .post(
+    validationMiddleware(forgetPasswordSchema),
+    UsersController.forgetPassword
+  );
+
+router
+  .route("/forget-password-verify")
+  .post(
+    validationMiddleware(forgetPasswordVerifySchema),
+    UsersController.forgetPasswordVerify
+  );
+
+router
+  .route("/forget-password-update")
+  .post(
+    validationMiddleware(forgetPasswordUpdateSchema),
+    UsersController.forgetPasswordUpdate
   );
 
 export default router;
