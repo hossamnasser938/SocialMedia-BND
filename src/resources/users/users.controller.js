@@ -57,7 +57,7 @@ export default class UsersController {
     try {
       const document = await UsersDAO.getUserByEmail(email);
       if (!document) {
-        sendUserNotFound(res);
+        sendFailureResponse(res, "error", "Incorrect email or password");
         return;
       }
 
@@ -67,7 +67,7 @@ export default class UsersController {
       );
 
       if (!isPasswordMatch) {
-        sendUserNotFound(res);
+        sendFailureResponse(res, "error", "Incorrect email or password");
         return;
       }
 
