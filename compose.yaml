@@ -1,0 +1,15 @@
+# Use root/example as user/password credentials
+version: "3.1"
+
+services:
+  mongo:
+    image: mongo
+
+  app:
+    image: node
+    ports:
+      - 3000:3000
+    command: sh -c "npm install; npm start"
+    working_dir: /app
+    volumes:
+      - ./:/app
